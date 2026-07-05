@@ -12,37 +12,41 @@ pipeline {
         stage('Build and Deploy on Remote Server') {
             steps {
                 sh '''
-                ssh -o StrictHostKeyChecking=no ubuntu@18.60.40.245 '
-                    set -e
+                ssh -o StrictHostKeyChecking=no ubuntu@18.60.40.245 << 'EOF'
+                set -e
 
-                    # Clone or update repository
-                    if [ -d "$HOME/bakery" ]; then
-                        cd "$HOME/bakery"
-                        git pull origin main
-                    else
-                        git clone -b main https://github.com/ghostgod21/bakery.git "$HOME/bakery"
-                        cd "$HOME/bakery"
-                    fi
+                # Clone or update repository
+                if [ -d "$HOME/bakery" ]; then
+                    cd "$HOME/bakery"
+                    git pull origin main
+                else
+                    git clone -b main https://github.com/ghostgod21/bakery.git "$HOME/bakery"
+                    cd "$HOME/bakery"
+                fi
 
-                    echo "===== Building Application ====="
-                    mvn clean package
+                echo "===== Building Application ====="
+                mvn clean package
 
-                    echo "===== Stopping Tomcat ====="
-                    /home/ubuntu/tomcat/bin/shutdown.sh || true
-                    sleep 5
+                echo "===== Stopping Tomcat ====="
+                sudo /home/ubuntu/tomcat/bin/shutdown.sh || true
+                sleep 5
 
-                    echo "===== Removing Old WAR ====="
-                    rm -f /home/ubuntu/tomcat/webapps/bakery.war
-                    rm -rf /home/ubuntu/tomcat/webapps/bakery
+                echo "===== Removing Old Deployment ====="
+                sudo rm -rf /home/ubuntu/tomcat/webapps/bakery
+                sudo rm -f /home/ubuntu/tomcat/webapps/bakery.war
 
-                    echo "===== Deploying New WAR ====="
-                    cp target/bakers-ecommerce.war /home/ubuntu/tomcat/webapps/bakery.war
+                echo "===== Deploying New WAR ====="
+                sudo cp target/bakers-ecommerce.war /home/ubuntu/tomcat/webapps/bakery.war
 
-                    echo "===== Starting Tomcat ====="
-                    /home/ubuntu/tomcat/bin/startup.sh
+                echo "===== Starting Tomcat ====="
+                sudo /home/ubuntu/tomcat/bin/startup.sh
 
-                    echo "===== Deployment Completed Successfully ====="
-                '
+                echo "===== Waiting for Deployment ====="
+                sleep 15
+
+                echo "===== Deployment Complete ====="
+                ls -l /home/ubuntu/tomcat/webapps
+                EOF
                 '''
             }
         }
