@@ -1,23 +1,64 @@
-sh '''
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build and Deploy on Remote Server') {
+            steps {
+                sh '''
 ssh -o StrictHostKeyChecking=no ubuntu@18.60.40.245 '
 set -e
 
-cd ~/bakery
-git pull origin main
+# Clone or update repository
+if [ -d "$HOME/bakery" ]; then
+    cd "$HOME/bakery"
+    git pull origin main
+else
+    git clone -b main https://github.com/ghostgod21/bakery.git "$HOME/bakery"
+    cd "$HOME/bakery"
+fi
+
+echo "===== Building Application ====="
 mvn clean package
 
+echo "===== Stopping Tomcat ====="
 sudo /home/ubuntu/tomcat/bin/shutdown.sh || true
 sleep 5
 
+echo "===== Removing Old Deployment ====="
 sudo rm -rf /home/ubuntu/tomcat/webapps/bakery
 sudo rm -f /home/ubuntu/tomcat/webapps/bakery.war
 
+echo "===== Deploying New WAR ====="
 sudo cp target/bakers-ecommerce.war /home/ubuntu/tomcat/webapps/bakery.war
 
+echo "===== Starting Tomcat ====="
 sudo /home/ubuntu/tomcat/bin/startup.sh
 
+echo "===== Waiting for Deployment ====="
 sleep 15
 
+echo "===== Deployment Complete ====="
 sudo ls -l /home/ubuntu/tomcat/webapps
 '
-'''
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Build and Deployment Successful!'
+        }
+
+        failure {
+            echo '❌ Build or Deployment Failed!'
+        }
+    }
+}
