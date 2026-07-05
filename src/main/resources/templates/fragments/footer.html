@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            🧁 Bakers<span class="brand-dot">.in</span>
+            <p>Cakes, pastries, pizza, burgers, mocktails &amp; snacks — baked, boxed, and on the way.</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">Home</a>
+            <a href="/products">Menu</a>
+            <a href="/about">About</a>
+            <a href="/cart">Cart</a>
+        </div>
+    </div>
+    <p class="footer-copy">&copy; <span th:text="${#dates.year(#dates.createNow())}">2026</span> Bakers.in — a demo storefront. Payments are captured as metadata only.</p>
+</footer>
+</body>
+</html>

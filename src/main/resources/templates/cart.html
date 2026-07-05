@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Your Cart — Bakers.in</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main>
+    <section class="section">
+        <h1 class="page-title">Your Cart</h1>
+
+        <p class="flash-message" th:if="${message != null}" th:text="${message}">Added to cart</p>
+
+        <div th:if="${cart == null or cart.empty}" class="empty-state">
+            <p>Your cart is empty.</p>
+            <a href="/products" class="btn btn-primary">Browse the Menu</a>
+        </div>
+
+        <div th:if="${cart != null and !cart.empty}" class="cart-layout">
+            <div class="cart-items">
+                <div th:each="entry : ${cart.items}" class="cart-item">
+                    <img th:src="${entry.value.imageUrl}" th:alt="${entry.value.productName}" class="cart-item-image"/>
+                    <div class="cart-item-info">
+                        <span class="cart-item-name" th:text="${entry.value.productName}">Product</span>
+                        <span class="cart-item-unit" th:text="'₹' + ${entry.value.unitPrice} + ' ' + ${entry.value.unitLabel}">₹499 per kg</span>
+                    </div>
+                    <form th:action="@{/cart/update}" method="post" class="cart-qty-form">
+                        <input type="hidden" name="productId" th:value="${entry.value.productId}"/>
+                        <input type="number" name="quantity" th:value="${entry.value.quantity}" min="1" max="20"
+                               onchange="this.form.submit()"/>
+                    </form>
+                    <span class="cart-item-subtotal" th:text="'₹' + ${entry.value.subtotal}">₹998</span>
+                    <form th:action="@{/cart/remove}" method="post">
+                        <input type="hidden" name="productId" th:value="${entry.value.productId}"/>
+                        <button type="submit" class="btn-remove" aria-label="Remove item">✕</button>
+                    </form>
+                </div>
+            </div>
+
+            <aside class="cart-summary">
+                <h2>Order Summary</h2>
+                <p class="free-delivery-note" th:unless="${cart.freeDeliveryUnlocked}"
+                   th:text="'Add ₹' + ${cart.amountToFreeDelivery} + ' more for free delivery!'">
+                    Add more for free delivery!
+                </p>
+                <p class="free-delivery-note" th:if="${cart.freeDeliveryUnlocked}">
+                    🎉 You've unlocked free delivery!
+                </p>
+
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span th:text="'₹' + ${cart.subtotal}">₹998</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery</span>
+                    <span th:text="${cart.deliveryFeeCharged} ? '₹' + ${cart.deliveryFee} : 'FREE'">FREE</span>
+                </div>
+                <div class="summary-row summary-total">
+                    <span>Total</span>
+                    <span th:text="'₹' + ${cart.total}">₹998</span>
+                </div>
+
+                <a href="/checkout" class="btn btn-primary btn-block">Proceed to Checkout</a>
+                <a href="/products" class="btn btn-secondary btn-block">Continue Shopping</a>
+            </aside>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

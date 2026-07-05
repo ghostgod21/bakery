@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Order Confirmed — Bakers.in</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main>
+    <section class="section confirmation-section">
+        <div class="confirmation-banner">
+            <span class="confirmation-icon">✅</span>
+            <h1>Thank you, <span th:text="${order.customerName}">Customer</span>!</h1>
+            <p>Your order has been placed successfully.</p>
+            <p class="order-number">Order Number: <strong th:text="${order.orderNumber}">BKI123456</strong></p>
+            <p class="order-status">Status: <span th:text="${order.status.label}">Placed</span></p>
+        </div>
+
+        <div class="checkout-layout">
+            <div class="checkout-form">
+                <h2>Delivery Details</h2>
+                <p><strong th:text="${order.customerName}">Name</strong></p>
+                <p th:text="${order.address}">Address</p>
+                <p th:text="${order.city} + ' - ' + ${order.pin}">City - PIN</p>
+                <p th:text="${order.phone}">Phone</p>
+                <p th:text="${order.email}">Email</p>
+                <p>Payment Method: <span th:text="${order.paymentMethod}">Cash on Delivery</span></p>
+            </div>
+
+            <aside class="cart-summary">
+                <h2>Order Items</h2>
+                <div class="summary-row" th:each="item : ${order.orderItems}">
+                    <span th:text="${item.productName} + ' x' + ${item.quantity}">Item x1</span>
+                    <span th:text="'₹' + ${item.subtotal}">₹499</span>
+                </div>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span th:text="'₹' + ${order.subtotal}">₹998</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery</span>
+                    <span th:text="${order.deliveryFeeCharged} ? '₹' + ${order.deliveryFee} : 'FREE'">FREE</span>
+                </div>
+                <div class="summary-row summary-total">
+                    <span>Total</span>
+                    <span th:text="'₹' + ${order.totalAmount}">₹998</span>
+                </div>
+            </aside>
+        </div>
+
+        <a href="/products" class="btn btn-primary">Continue Shopping</a>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

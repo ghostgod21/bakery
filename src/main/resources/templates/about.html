@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>About — Bakers.in</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main>
+    <section class="section about-section">
+        <h1 class="page-title">About Bakers.in</h1>
+        <p>
+            Bakers.in is a colourful, multi-category food storefront — cakes, pastries &amp;
+            desserts, pizza, burgers, mocktails, and cookies &amp; snacks, all from one kitchen.
+            This demo build ships with sample products and a full cart-to-checkout flow, ready
+            to be adapted into a real bakery or cloud-kitchen ordering site.
+        </p>
+        <p>
+            Product photos here are colour-coded placeholders labelled with each product's
+            name, so the app runs out of the box with zero setup and no image licensing risk.
+            Swap them for real photography whenever you're ready to go live.
+        </p>
+        <p>
+            Orders placed here are stored for reference, and the selected payment method is
+            captured as metadata only — no real payment is processed.
+        </p>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

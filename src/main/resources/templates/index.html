@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Bakers.in — Cakes, Pizza, Burgers &amp; More</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main>
+    <section class="hero">
+        <div class="hero-text">
+            <h1>Freshly baked. <br/>Delivered with a smile.</h1>
+            <p>Cakes, pastries, pizza, burgers, mocktails, and cookies — all from one colourful kitchen.</p>
+            <a href="/products" class="btn btn-primary">Order Now</a>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Shop by Category</h2>
+        <div class="category-grid">
+            <a th:each="cat : ${categories}"
+               th:href="@{/products(category=${cat.slug})}"
+               th:style="'--accent:' + ${cat.accentColor}"
+               class="category-card">
+                <span class="category-icon" th:text="${cat.icon}">🎂</span>
+                <span class="category-name" th:text="${cat.name}">Category</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="section" th:if="${featuredProducts != null and !featuredProducts.isEmpty()}">
+        <h2 class="section-title">On Sale Right Now</h2>
+        <div class="product-grid">
+            <div th:each="product : ${featuredProducts}"
+                 th:style="'--accent:' + ${product.category.accentColor}"
+                 class="product-card">
+                <a th:href="@{/products/{slug}(slug=${product.slug})}" class="product-image-link">
+                    <img th:src="${product.imageUrl}" th:alt="${product.name}" class="product-image"/>
+                    <span class="sale-badge" th:if="${product.onSale}" th:text="${product.discountPercent} + '% OFF'">10% OFF</span>
+                </a>
+                <div class="product-info">
+                    <a th:href="@{/products/{slug}(slug=${product.slug})}" class="product-name" th:text="${product.name}">Product</a>
+                    <div class="product-rating" th:if="${product.rating != null}">⭐ <span th:text="${product.rating}">4.5</span></div>
+                    <div class="product-price">
+                        <span class="price-current" th:text="'₹' + ${product.effectivePrice}">₹499</span>
+                        <span class="price-original" th:if="${product.onSale}" th:text="'₹' + ${product.price}">₹599</span>
+                        <span class="price-unit" th:text="${product.unit.label}">per kg</span>
+                    </div>
+                    <form th:action="@{/cart/add}" method="post" class="add-to-cart-form">
+                        <input type="hidden" name="productId" th:value="${product.id}"/>
+                        <input type="hidden" name="quantity" value="1"/>
+                        <button type="submit" class="btn btn-add">Add to Cart</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
