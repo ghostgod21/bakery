@@ -8,7 +8,6 @@ pipeline {
         REMOTE_USER  = 'ubuntu'
         REMOTE_HOST  = '18.60.40.245'
         REMOTE_PATH  = '/opt/tomcat/webapps'
-        SSH_CRED_ID  = 'maven-server-ip'        // <-- Jenkins SSH private key credential ID
     }
 
     stages {
@@ -21,27 +20,20 @@ pipeline {
 
         stage('Build and Deploy on Remote Server') {
             steps {
-                withCredentials([string(credentialsId: "${SSH_CRED_ID}", variable: 'SSH_PRIVATE_KEY')]) {
-                    sh '''
-                        echo "$SSH_PRIVATE_KEY" > /tmp/deploy_key
-                        chmod 600 /tmp/deploy_key
-
-                        ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
-                            set -e
-                            if [ -d ${APP_NAME} ]; then
-                                cd ${APP_NAME} && git pull
-                            else
-                                git clone -b ${GIT_BRANCH} ${GIT_REPO} ${APP_NAME}
-                                cd ${APP_NAME}
-                            fi
-                            mvn clean package
-                            sudo cp target/bakers-ecommerce.war ${REMOTE_PATH}/${APP_NAME}.war
-                            sudo systemctl restart tomcat
-                        "
-
-                        rm -f /tmp/deploy_key
-                    '''
-                }
+                sh '''
+                    ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
+                        set -e
+                        if [ -d ${APP_NAME} ]; then
+                            cd ${APP_NAME} && git pull
+                        else
+                            git clone -b ${GIT_BRANCH} ${GIT_REPO} ${APP_NAME}
+                            cd ${APP_NAME}
+                        fi
+                        mvn clean package
+                        sudo cp target/bakers-ecommerce.war ${REMOTE_PATH}/${APP_NAME}.war
+                        sudo systemctl restart tomcat
+                    "
+                '''
             }
         }
     }
