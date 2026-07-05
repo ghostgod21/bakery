@@ -21,9 +21,12 @@ pipeline {
 
         stage('Build and Deploy on Remote Server') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: "${SSH_CRED_ID}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
+                withCredentials([string(credentialsId: "${SSH_CRED_ID}", variable: 'SSH_PRIVATE_KEY')]) {
                     sh '''
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
+                        echo "$SSH_PRIVATE_KEY" > /tmp/deploy_key
+                        chmod 600 /tmp/deploy_key
+
+                        ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
                             set -e
                             if [ -d ${APP_NAME} ]; then
                                 cd ${APP_NAME} && git pull
@@ -35,6 +38,8 @@ pipeline {
                             sudo cp target/bakers-ecommerce.war ${REMOTE_PATH}/${APP_NAME}.war
                             sudo systemctl restart tomcat
                         "
+
+                        rm -f /tmp/deploy_key
                     '''
                 }
             }
