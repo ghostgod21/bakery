@@ -6,9 +6,9 @@ pipeline {
         GIT_REPO     = 'https://github.com/ghostgod21/bakery.git'
         GIT_BRANCH   = 'main'
         REMOTE_USER  = 'ubuntu'
-        REMOTE_HOST  = '<SERVER_IP>'            // <-- IP of your Maven+Tomcat server
+        REMOTE_HOST  = '18.60.40.245'
         REMOTE_PATH  = '/opt/tomcat/webapps'
-        SSH_CRED_ID  = 'maven-server-ip'        // <-- Jenkins SSH credentials ID
+        SSH_CRED_ID  = 'maven-server-ip'        // <-- Jenkins SSH private key credential ID
     }
 
     stages {
@@ -21,9 +21,9 @@ pipeline {
 
         stage('Build and Deploy on Remote Server') {
             steps {
-                sshagent(credentials: ["${SSH_CRED_ID}"]) {
+                withCredentials([sshUserPrivateKey(credentialsId: "${SSH_CRED_ID}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
                             set -e
                             if [ -d ${APP_NAME} ]; then
                                 cd ${APP_NAME} && git pull
