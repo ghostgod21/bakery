@@ -1,14 +1,16 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven-3'   // must match the name you give it in Manage Jenkins -> Tools
+    }
+
     environment {
         APP_NAME     = 'bakery'
-        GIT_REPO     = 'https://github.com/ghostgod21/bakery.git'
-        GIT_BRANCH   = 'main'
         REMOTE_USER  = 'ubuntu'
-        REMOTE_HOST  = '<SERVER_IP>'                 // <-- put your Ubuntu server's IP here
+        REMOTE_HOST  = '<SERVER_IP>'
         REMOTE_PATH  = '/opt/tomcat/webapps'
-        SSH_CRED_ID  = 'maven-server-ip'              // <-- Jenkins credentials ID (SSH key) for the server
+        SSH_CRED_ID  = 'maven-server-ip'
     }
 
     stages {
@@ -21,14 +23,11 @@ pipeline {
 
         stage('Maven Build and Deploy') {
             steps {
-                sh 'git clone ${GIT_REPO} -b ${GIT_BRANCH} repo || true'
-                dir('repo') {
-                    sh 'mvn clean package'
-                }
+                sh 'mvn clean package'
 
                 sshagent(credentials: ["${SSH_CRED_ID}"]) {
                     sh '''
-                        scp -o StrictHostKeyChecking=no repo/target/${APP_NAME}.war ${REMOTE_USER}@${REMOTE_HOST}:/tmp/${APP_NAME}.war
+                        scp -o StrictHostKeyChecking=no target/bakers-ecommerce.war ${REMOTE_USER}@${REMOTE_HOST}:/tmp/${APP_NAME}.war
                         ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
                             sudo cp /tmp/${APP_NAME}.war ${REMOTE_PATH}/${APP_NAME}.war &&
                             sudo systemctl restart tomcat
