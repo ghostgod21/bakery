@@ -1,16 +1,12 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven-3'   // must match the name you give it in Manage Jenkins -> Tools
-    }
-
     environment {
         APP_NAME     = 'bakery'
         REMOTE_USER  = 'ubuntu'
-        REMOTE_HOST  = '<SERVER_IP>'
+        REMOTE_HOST  = '<SERVER_IP>'          // <-- set your Ubuntu server's IP
         REMOTE_PATH  = '/opt/tomcat/webapps'
-        SSH_CRED_ID  = 'maven-server-ip'
+        SSH_CRED_ID  = 'maven-server-ip'       // <-- Jenkins SSH credentials ID
     }
 
     stages {
