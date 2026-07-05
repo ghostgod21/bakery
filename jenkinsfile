@@ -32,8 +32,8 @@ pipeline {
                 sleep 5
 
                 echo "===== Removing Old Deployment ====="
-                sudo rm -rf /home/ubuntu/tomcat/webapps/bakery
                 sudo rm -f /home/ubuntu/tomcat/webapps/bakery.war
+                sudo rm -rf /home/ubuntu/tomcat/webapps/bakery
 
                 echo "===== Deploying New WAR ====="
                 sudo cp target/bakers-ecommerce.war /home/ubuntu/tomcat/webapps/bakery.war
@@ -45,7 +45,8 @@ pipeline {
                 sleep 15
 
                 echo "===== Deployment Complete ====="
-                ls -l /home/ubuntu/tomcat/webapps
+                sudo ls -l /home/ubuntu/tomcat/webapps
+
                 EOF
                 '''
             }
