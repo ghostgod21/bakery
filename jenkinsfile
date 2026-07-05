@@ -1,15 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        APP_NAME     = 'bakery'
-        GIT_REPO     = 'https://github.com/ghostgod21/bakery.git'
-        GIT_BRANCH   = 'main'
-        REMOTE_USER  = 'ubuntu'
-        REMOTE_HOST  = '18.60.40.245'
-        REMOTE_PATH  = '/opt/tomcat/webapps'
-    }
-
     stages {
 
         stage('Checkout') {
@@ -21,18 +12,37 @@ pipeline {
         stage('Build and Deploy on Remote Server') {
             steps {
                 sh '''
-                    ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
-                        set -e
-                        if [ -d ${APP_NAME} ]; then
-                            cd ${APP_NAME} && git pull
-                        else
-                            git clone -b ${GIT_BRANCH} ${GIT_REPO} ${APP_NAME}
-                            cd ${APP_NAME}
-                        fi
-                        mvn clean package
-                        sudo cp target/bakers-ecommerce.war ${REMOTE_PATH}/${APP_NAME}.war
-                        sudo systemctl restart tomcat
-                    "
+                ssh -o StrictHostKeyChecking=no ubuntu@18.60.40.245 '
+                    set -e
+
+                    # Clone or update repository
+                    if [ -d "$HOME/bakery" ]; then
+                        cd "$HOME/bakery"
+                        git pull origin main
+                    else
+                        git clone -b main https://github.com/ghostgod21/bakery.git "$HOME/bakery"
+                        cd "$HOME/bakery"
+                    fi
+
+                    echo "===== Building Application ====="
+                    mvn clean package
+
+                    echo "===== Stopping Tomcat ====="
+                    /home/ubuntu/tomcat/bin/shutdown.sh || true
+                    sleep 5
+
+                    echo "===== Removing Old WAR ====="
+                    rm -f /home/ubuntu/tomcat/webapps/bakery.war
+                    rm -rf /home/ubuntu/tomcat/webapps/bakery
+
+                    echo "===== Deploying New WAR ====="
+                    cp target/bakers-ecommerce.war /home/ubuntu/tomcat/webapps/bakery.war
+
+                    echo "===== Starting Tomcat ====="
+                    /home/ubuntu/tomcat/bin/startup.sh
+
+                    echo "===== Deployment Completed Successfully ====="
+                '
                 '''
             }
         }
@@ -40,10 +50,11 @@ pipeline {
 
     post {
         success {
-            echo "✅ ${APP_NAME} built and deployed on ${REMOTE_HOST} successfully."
+            echo '✅ Build and Deployment Successful!'
         }
+
         failure {
-            echo "❌ Build or deployment failed."
+            echo '❌ Build or Deployment Failed!'
         }
     }
 }
